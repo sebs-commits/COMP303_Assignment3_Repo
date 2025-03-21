@@ -1,4 +1,7 @@
 package com.example.sebastian_301241956_assignment3.customer;
 
-public interface CustomerRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface CustomerRepository extends JpaRepository<Customer, Integer> {
+    //
 }
