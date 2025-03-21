@@ -20,7 +20,7 @@ public class LoginController {
     @Autowired
     private LoginRepository loginRepository;
     @PostMapping("/login")
-    public ResponseEntity<?> loginCustomer(@Valid @RequestBody Customer customer, HttpSession session) {
+    public ResponseEntity<?> loginCustomer(@RequestBody Customer customer, HttpSession session) {
         try{
             // First check if user exists
             if(loginRepository.findByUsername(customer.getUsername()) == null){
