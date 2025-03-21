@@ -51,4 +51,7 @@ public class Customer {
     @Column(name = "phone")
     private String phone;
 
+    @Column(name = "is_admin")
+    private boolean isAdmin;
+
 }
