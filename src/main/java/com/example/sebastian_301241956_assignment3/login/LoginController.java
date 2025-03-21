@@ -51,4 +51,15 @@ public class LoginController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @PostMapping("/logout")
+    public ResponseEntity<?> logoutCustomer(HttpSession session) {
+        try{
+            // Remove session information
+            session.invalidate();
+            return ResponseEntity.ok("Logout successful");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
+    }
 }
