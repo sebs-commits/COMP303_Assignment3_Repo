@@ -52,6 +52,6 @@ public class Customer {
     private String phone;
 
     @Column(name = "is_admin")
-    private boolean isAdmin;
+    private boolean admin;
 
 }
