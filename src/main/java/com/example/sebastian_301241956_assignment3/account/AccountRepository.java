@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface AccountRepository extends JpaRepository<Account, Integer> {
-    List<Account> findByCustomerCustomerId(int customerId);
 
     @Query("SELECT new map(a.accountNumber as accountNumber, " +
             "a.accountType as accountType, " +
@@ -18,4 +17,14 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
             "FROM Account a JOIN a.customer c " +
             "WHERE c.customerId = :customerId")
     List<Map<String, Object>> findAccountsWithCustomerNameById(int customerId);
+
+    @Query("SELECT new map(" +
+            "a.accountNumber as accountNumber, " +
+            "a.accountType.accountTypeName as accountType, " +
+            "a.balance as balance, " +
+            "a.overDraftLimit as overDraftLimit, " +
+            "a.customer.customerId as customerId) " +
+            "FROM Account a " +
+            "ORDER BY a.customer.customerId")
+    List<Map<String, Object>> findAllAccountsWithCustomerId();
 }
