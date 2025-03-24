@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 @RestController
@@ -87,7 +88,7 @@ public class AccountManagerController {
     @PutMapping("/customers/{id}")
     public ResponseEntity<?> updateCustomer(@PathVariable int id, @RequestBody Customer customerDetails) {
         Optional<Customer> optionalCustomer = customerRepository.findById(id);
-        if (!optionalCustomer.isPresent()) {
+        if (optionalCustomer.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
@@ -121,13 +122,57 @@ public class AccountManagerController {
         // Save the updated customer
         Customer updatedCustomer = customerRepository.save(customer);
 
-        // Map to only return specific fields, not returning password
+        // Not returning password
         Map<String, Object> response = new HashMap<>();
         response.put("customerId", updatedCustomer.getCustomerId());
         response.put("customerName", updatedCustomer.getCustomerName());
         response.put("username", updatedCustomer.getUsername());
         response.put("address", updatedCustomer.getAddress());
         response.put("postalCode", updatedCustomer.getPostalCode());
+
+        return ResponseEntity.ok(response);
+    }
+
+
+    @PutMapping("/customers/{customerId}/accounts")
+    public ResponseEntity<?> updateCustomerAccount(
+            @PathVariable int customerId,
+            @RequestBody Map<String, Object> accountDetails) {
+
+        // Check if customer exists
+        if (!customerRepository.existsById(customerId)) {
+            return ResponseEntity.status(404).body("Customer not found");
+        }
+
+        // Extract account ID from request
+        Integer accountId = (Integer) accountDetails.get("accountNumber");
+        if (accountId == null) {
+            return ResponseEntity.badRequest().body("Account number is required");
+        }
+
+        Optional<Account> optionalAccount = accountRepository.findById(accountId);
+        if (optionalAccount.isEmpty()) {
+            return ResponseEntity.status(404).body("Account not found");
+        }
+
+        Account account = optionalAccount.get();
+
+        if (account.getCustomer().getCustomerId() != customerId) {
+            return ResponseEntity.status(403).body("Account does not belong to this customer");
+        }
+
+        if (accountDetails.get("balance") != null) {
+            BigDecimal newBalance = new BigDecimal(accountDetails.get("balance").toString());
+            account.setBalance(newBalance);
+        }
+
+
+        // Save the updated account and custom response
+        Account updatedAccount = accountRepository.save(account);
+        Map<String, Object> response = new HashMap<>();
+        response.put("accountNumber", updatedAccount.getAccountNumber());
+        response.put("balance", updatedAccount.getBalance());
+        response.put("message", "Successfully updated!");
 
         return ResponseEntity.ok(response);
     }
