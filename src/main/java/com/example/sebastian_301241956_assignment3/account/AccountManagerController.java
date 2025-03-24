@@ -40,6 +40,11 @@ public class AccountManagerController {
         List<Map<String, Object>> accountTypesSummary = accountTypeRepository.findAccountTypesSummary();
         return ResponseEntity.ok(accountTypesSummary);
     }
+    @GetMapping("/get-customers/{id}")
+    public ResponseEntity<?> getCustomer(@PathVariable int id) {
+        List<Map<String, Object>> customers = customerRepository.findAllCustomersWithDetails();
+        return ResponseEntity.ok(customers);
+    }
 
     @GetMapping("/customers")
     public ResponseEntity<?> getCustomersWithAccounts() {
@@ -177,7 +182,7 @@ public class AccountManagerController {
         return ResponseEntity.ok(response);
     }
 
-
+    //username, customerName, password, address, postalCode, city
 //    @GetMapping("/temp")
 //    public ResponseEntity<List<Map<String, Object>>> getAllCustomers() {
 //        List<Customer> customers = customerRepository.findByAdminFalse();
