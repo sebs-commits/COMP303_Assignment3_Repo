@@ -5,10 +5,7 @@ import com.example.sebastian_301241956_assignment3.customer.Customer;
 import com.example.sebastian_301241956_assignment3.customer.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
@@ -25,7 +22,7 @@ public class AccountManagerController {
     private AccountTypeRepository accountTypeRepository;
 
 
-    @GetMapping("/customers/{id}/accounts")
+    @GetMapping("/customers/{id}")
     public ResponseEntity<?> getCustomerAccounts(@PathVariable int id) {
         // Check if customer exists
         if (!customerRepository.existsById(id)) {
@@ -83,6 +80,56 @@ public class AccountManagerController {
         }
 
         return ResponseEntity.ok(customers);
+    }
+
+
+    // Update specific customer information
+    @PutMapping("/customers/{id}")
+    public ResponseEntity<?> updateCustomer(@PathVariable int id, @RequestBody Customer customerDetails) {
+        Optional<Customer> optionalCustomer = customerRepository.findById(id);
+        if (!optionalCustomer.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Customer customer = optionalCustomer.get();
+
+        // Only update fields that are not null in the request
+        // username, customerName, password, address, postalCode, city then only return the following fields, not the full object
+        if (customerDetails.getUsername() != null) {
+            customer.setUsername(customerDetails.getUsername());
+        }
+
+        if (customerDetails.getCustomerName() != null) {
+            customer.setCustomerName(customerDetails.getCustomerName());
+        }
+
+        if (customerDetails.getPassword() != null) {
+            customer.setPassword(customerDetails.getPassword());
+        }
+
+        if (customerDetails.getAddress() != null) {
+            customer.setAddress(customerDetails.getAddress());
+        }
+
+        if (customerDetails.getPostalCode() != null) {
+            customer.setPostalCode(customerDetails.getPostalCode());
+        }
+        if (customerDetails.getPassword() != null){
+            customer.setPassword(customerDetails.getPassword());
+        }
+
+        // Save the updated customer
+        Customer updatedCustomer = customerRepository.save(customer);
+
+        // Map to only return specific fields, not returning password
+        Map<String, Object> response = new HashMap<>();
+        response.put("customerId", updatedCustomer.getCustomerId());
+        response.put("customerName", updatedCustomer.getCustomerName());
+        response.put("username", updatedCustomer.getUsername());
+        response.put("address", updatedCustomer.getAddress());
+        response.put("postalCode", updatedCustomer.getPostalCode());
+
+        return ResponseEntity.ok(response);
     }
 
 
