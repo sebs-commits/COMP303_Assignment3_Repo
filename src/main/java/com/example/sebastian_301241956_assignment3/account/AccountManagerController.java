@@ -42,8 +42,13 @@ public class AccountManagerController {
     }
     @GetMapping("/get-customers/{id}")
     public ResponseEntity<?> getCustomer(@PathVariable int id) {
-        List<Map<String, Object>> customers = customerRepository.findAllCustomersWithDetails();
-        return ResponseEntity.ok(customers);
+        Optional<Map<String, Object>> customerDetails = customerRepository.findCustomerDetailsById(id);
+
+        if (customerDetails.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(customerDetails.get());
     }
 
     @GetMapping("/customers")
