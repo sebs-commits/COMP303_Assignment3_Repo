@@ -13,7 +13,11 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
             "a.balance as balance, " +
             "a.overDraftLimit as overDraftLimit, " +
             "c.customerId as customerId, " +
-            "c.customerName as customerName) " +
+            "c.customerName as customerName, " +
+            "c.username as username, " +
+            "c.address as address, " +
+            "c.postalCode as postalCode, " +
+            "c.city as city) " +
             "FROM Account a JOIN a.customer c " +
             "WHERE c.customerId = :customerId")
     List<Map<String, Object>> findAccountsWithCustomerNameById(int customerId);
