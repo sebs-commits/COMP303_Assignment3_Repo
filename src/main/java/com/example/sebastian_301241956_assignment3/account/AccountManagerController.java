@@ -1,5 +1,6 @@
 package com.example.sebastian_301241956_assignment3.account;
 
+import com.example.sebastian_301241956_assignment3.account.type.AccountType;
 import com.example.sebastian_301241956_assignment3.account.type.AccountTypeRepository;
 import com.example.sebastian_301241956_assignment3.customer.Customer;
 import com.example.sebastian_301241956_assignment3.customer.CustomerRepository;
@@ -144,6 +145,7 @@ public class AccountManagerController {
     }
 
 
+    // Update specific customer account
     @PutMapping("/customers/{customerId}/accounts")
     public ResponseEntity<?> updateCustomerAccount(
             @PathVariable int customerId,
@@ -175,6 +177,10 @@ public class AccountManagerController {
             BigDecimal newBalance = new BigDecimal(accountDetails.get("balance").toString());
             account.setBalance(newBalance);
         }
+        if (accountDetails.get("overDraftLimit") != null) {
+            BigDecimal newOverdraftLimit = new BigDecimal(accountDetails.get("overDraftLimit").toString());
+            account.setOverDraftLimit(newOverdraftLimit);
+        }
 
 
         // Save the updated account and custom response
@@ -182,9 +188,57 @@ public class AccountManagerController {
         Map<String, Object> response = new HashMap<>();
         response.put("accountNumber", updatedAccount.getAccountNumber());
         response.put("balance", updatedAccount.getBalance());
+        response.put("overdraft limit", updatedAccount.getOverDraftLimit());
         response.put("message", "Successfully updated!");
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/customers/{id}/add-account")
+    public ResponseEntity<?> addAccountToCustomer(
+            @PathVariable int id,
+            @RequestBody Map<String, Object> accountDetails) {
+
+        // Check if customer exists
+        Optional<Customer> optionalCustomer = customerRepository.findById(id);
+        if (optionalCustomer.isEmpty()) {
+            return ResponseEntity.status(404).body("Customer not found");
+        }
+
+        // Extract account type ID from request
+        Integer accountTypeId = (Integer) accountDetails.get("accountTypeId");
+        if (accountTypeId == null) {
+            return ResponseEntity.badRequest().body("Account type is required");
+        }
+
+        // Find the account type
+        Optional<AccountType> optionalAccountType = accountTypeRepository.findById(accountTypeId);
+        if (optionalAccountType.isEmpty()) {
+            return ResponseEntity.status(404).body("Account type not found");
+        }
+
+        // Create new account
+        Account newAccount = new Account();
+        newAccount.setCustomer(optionalCustomer.get());
+        newAccount.setAccountType(optionalAccountType.get());
+        newAccount.setBalance(new BigDecimal("0.00"));
+        newAccount.setOverDraftLimit(new BigDecimal("0.00"));
+
+        // Save the new account
+        Account savedAccount = accountRepository.save(newAccount);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("accountNumber", savedAccount.getAccountNumber());
+        response.put("accountType", savedAccount.getAccountType().getAccountTypeName());
+        response.put("message", "Account successfully added to customer");
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/account-types/overdraft")
+    public ResponseEntity<?> getAccountTypesWithHighOverdraft() {
+        List<Map<String, Object>> accountTypesWithHighOverdraft = accountRepository.findAccountTypesWithHighOverdraft();
+        return ResponseEntity.ok(accountTypesWithHighOverdraft);
     }
 
     //username, customerName, password, address, postalCode, city

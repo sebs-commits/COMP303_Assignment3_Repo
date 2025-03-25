@@ -31,4 +31,11 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
             "FROM Account a " +
             "ORDER BY a.customer.customerId")
     List<Map<String, Object>> findAllAccountsWithCustomerId();
+
+    @Query("SELECT new map(" +
+            "a.accountType.accountTypeName as accountTypeName) " +
+            "FROM Account a " +
+            "WHERE a.overDraftLimit > 1000 " +
+            "GROUP BY a.accountType.accountTypeName")
+    List<Map<String, Object>> findAccountTypesWithHighOverdraft();
 }
